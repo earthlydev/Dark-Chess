@@ -3,6 +3,8 @@
 # Date: 12/08/2024
 # Description:
 
+import pprint
+
 class ChessVar:
     """
     A class to represent a game of dark chess. Uses Chess Piece class
@@ -22,12 +24,12 @@ class ChessVar:
             [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
             ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
             ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'] ]
-        self._white_pieces = ['P','R','N','B','Q','K']
-        self._black_pieces = ['p','r','n','b','q','k']
+        self._current_player = 'WHITE'
 
     def convert_position(self, pos):
         """
         Convert the position into board indices
+        :param pos: A string for the position specified
         :return: A tuple for the row and the column
         """
         columns = ['a','b','c','d','e','f','g','h']
@@ -35,19 +37,6 @@ class ChessVar:
         col = columns.index(pos[0])
         row = rows.index(pos[1])
         return row, col
-
-    # USE A 2D LIST THAT CONTAINS ALL OF THE BOARD'S POSITIONS, NO PIECES ARE SHOWN.
-    # WHEN THE POSITION MATCHES ONE ON THE BOARD RETURN THE POSITION INTO A TUPLE.
-    def king_is_check(self):
-        """
-        Check if the king is in check
-        :return: True if an opposing piece can capture the king, otherwise False
-        """
-# Find the position of the king on the board by looping through. After finding the king,
-    # using the list of the opponents pieces iterate through the board and find matching pieces
-    # when a piece matches one from the list check their valid_moves() and if a valid_move() falls within range
-    # of the king's position (king_pos) then return True
-    # If the loop ends then return False
 
     def get_game_state(self):
         """
@@ -96,6 +85,131 @@ class ChessVar:
         new_row, new_col = self.convert_position(new_pos)
         if new_row > 7 or new_col > 7: # new position is out of boundaries
             return False
+        return True
+
+    def validate_pawn_move(self, piece, current_pos, new_pos):
+        """
+        Checks if new_position is a valid pawn move and makes sure any opponent captures are valid.
+        :param piece: string for the color pawn piece - lowercase for black, uppercase for white
+        :param current_pos: int for the current pawn position
+        :param new_pos: int for the destination pawn position
+        :return: True if the move is valid, otherwise False
+        """
+        current_row, current_col = self.convert_position(current_pos)
+        new_row, new_col = self.convert_position(new_pos)
+        if piece == 'p': # Black pawn logic
+            if new_col == current_col: # a7 = [1][0] = [3][0]
+                if ((new_row == current_row + 1 or new_row == current_row + 2)
+                        and self._board[new_row][new_col] == ' '):
+                    return True # If the pawn moves within 2 rows down and same column true
+            if (new_row == current_row + 1
+                    and (new_col == current_col + 1 or new_col == current_col - 1)
+                    and self._board[current_row][current_col] != ' '):
+                if self._board[new_row][new_col].isupper():
+                    return True
+        elif piece == 'P': # White pawn logic
+            if new_row <= current_row - 2 and self._board[new_row][new_col] == ' ':
+                    return True
+            if (new_row == current_row - 1
+                    and (new_col == current_col + 1 or new_col == current_col - 1)
+                    and self._board[current_row][current_col] != ' '):
+                if self._board[new_row][new_col].islower():
+                    return True
+        return False
+
+    def validate_rook_move(self, piece, current_pos, new_pos):
+        """
+        Checks if new_position is a valid rook move and makes sure any opponent captures are valid.
+        :param piece: string for the color rook piece - lowercase for black, uppercase for white
+        :param current_pos: int for the current rook position
+        :param new_pos: int for the destination rook position
+        :return: True if the move is valid, otherwise False
+        """
+        current_row, current_col = self.convert_position(current_pos)
+        new_row, new_col = self.convert_position(new_pos)
+        row = current_row
+        col = current_col
+        # Checks horizontal/vertical paths for pieces in the way
+        if new_row == current_row or new_col == current_col:
+            if new_row != current_row:
+                if new_row > current_row:
+                    index = 1
+                else:
+                    index = -1
+                for row in range(current_row + index, new_row, index):
+                    if self._board[row][new_col] != ' ':
+                        return False
+            elif current_col != new_col:
+                if new_col > current_col:
+                    index = 1
+                else:
+                    index = -1
+                for col in range(current_col + index, new_col, index):
+                    if self._board[row][col] != ' ':
+                        return False
+        # if all passes checks if the piece to be captured is an opponent or if the space is empty
+        if self._board[new_row][new_col] == ' ':  # if destination is empty
+            return True
+        elif (piece == 'r' and self._board[new_row][new_col].isupper()
+              or (piece == 'R' and self._board[new_row][new_col].islower())):  # Checks if piece is opponent
+            return True
+
+    def validate_knight_move(self, piece, current_pos, new_pos):
+        """
+        Checks if new_position is a valid knight move and makes sure any opponent captures are valid.
+        :param piece: string for the color knight piece - lowercase for black, uppercase for white
+        :param current_pos: int for the current knight position
+        :param new_pos: int for the destination knight position
+        :return: True if the move is valid, otherwise False
+        """
+        pass
+
+    def validate_bishop_moves(self, piece, current_pos, new_pos):
+        """
+        Checks if new_position is a valid bishop move and makes sure any opponent captures are valid.
+        :param piece: string for the color bishop piece - lowercase for black, uppercase for white
+        :param current_pos: int for the current bishop position
+        :param new_pos: int for the destination bishop position
+        :return: True if the move is valid, otherwise False
+        """
+        current_row, current_col = self.convert_position(current_pos)
+        new_row, new_col = self.convert_position(new_pos)
+        if current_row == new_row or current_col == new_col:
+            return False # The move is not along a diagonal path
+        pass
+
+    def get_queen_moves(self):
+        pass
+    def get_king_moves(self):
+        pass
+
+    def set_current_player(self):
+        """
+        Sets the player to white or black depending on who made the last move
+        """
+        if self._current_player == 'WHITE':
+            self._current_player = 'BLACK'
+        elif self._current_player == 'BLACK':
+            self._current_player = 'WHITE'
+
+    def is_players_piece(self,piece):
+        """
+        Checks if the piece corresponds with the current players
+        :param piece: A string for the current piece
+        :return: True if the piece corresponds with the current players, otherwise False
+        """
+        if self._current_player == 'WHITE' and piece.islower():
+            return False
+        elif self._current_player == 'BLACK' and piece.isupper():
+            return False
+        return True
+
+    def validate_move(self, piece, current_pos, new_pos):
+        if piece == 'p' or piece == 'P':
+            return self.validate_pawn_move(piece, current_pos, new_pos)
+        elif piece =='r' or piece == 'R':
+            return self.validate_rook_move(piece, current_pos, new_pos)
+
 
     def make_move(self, current_pos, new_pos):
         """
@@ -105,13 +219,21 @@ class ChessVar:
         :return: True for a valid move, when true moves piece and captures any pieces.
             False otherwise
         """
+        current_row, current_col = self.convert_position(current_pos)
+        piece = self._board[current_row][current_col]
+        new_row, new_col = self.convert_position(new_pos)
         if self.get_game_state() != 'UNFINISHED': # The game is finished
             return False
-        if self.is_in_bounds(new_pos): # If out of bounds
+        elif not self.is_in_bounds(current_pos) and not self.is_in_bounds(new_pos): # If starting position and destination position is within bounds
             return False
-        current_row, current_col = self.convert_position(current_pos)
-        new_row, new_col = self.convert_position(new_pos)
-        piece = self._board[current_row][current_col]
-        self._board[current_row][current_col] = ' ' # Replaces the old position as empty
-        self._board[new_row][new_col] = piece # Captures any pieces that is there
-        return True
+        elif self._board[current_row][current_col] == ' ': # There is no piece at this position
+            return False
+        elif not self.is_players_piece(piece): # The piece does not belong to the player
+            return False
+        elif not self.validate_move(piece, current_pos, new_pos):
+            return False
+        else:
+            self._board[current_row][current_col] = ' ' # Replaces the old position as empty
+            self._board[new_row][new_col] = piece # Captures any pieces that is there
+            self.set_current_player() # Switches players turn
+            return True

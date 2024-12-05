@@ -127,7 +127,7 @@ class ChessVar:
                 if self._board[new_row][new_col].isupper():
                     return True
         elif piece == 'P': # White pawn logic
-            if new_row <= current_row - 2 and self._board[new_row][new_col] == ' ':
+            if new_row >= current_row - 2 and self._board[new_row][new_col] == ' ':
                     return True
             if (new_row == current_row - 1
                     and (new_col == current_col + 1 or new_col == current_col - 1)
@@ -275,11 +275,11 @@ class ChessVar:
             return True
 
 # game = ChessVar()
-# print(game.make_move('d2', 'd4'))
+# print(game.make_move('a2', 'a4'))
 # print(game.make_move('g7', 'g5'))
 # print(game.make_move('c1', 'g5'))
-# # print(game.make_move('e7', 'e6'))
-# # print(game.make_move('g5', 'd8'))
+# print(game.make_move('e7', 'e6'))
+# print(game.make_move('g5', 'd8'))
 # pprint.pp(game.get_board("audience"))
-# # print(game.get_board("white"))
-# # print(game.get_board("black"))
+# print(game.get_board("white"))
+# print(game.get_board("black"))

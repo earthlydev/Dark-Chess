@@ -3,8 +3,6 @@
 # Date: 12/08/2024
 # Description:
 
-import pprint
-
 class ChessVar:
     """
     A class to represent a game of dark chess. Uses Chess Piece class
@@ -73,7 +71,6 @@ class ChessVar:
                 for j in range(len(self._board[i])):
                     if self._board[i][j].isupper():
                         oriented_board[i][j] = '*'
-            oriented_board = oriented_board[::-1]
         return oriented_board
 
     def is_in_bounds(self, new_pos):
@@ -84,6 +81,19 @@ class ChessVar:
         """
         new_row, new_col = self.convert_position(new_pos)
         if new_row > 7 or new_col > 7: # new position is out of boundaries
+            return False
+        return True
+
+    def is_opponent(self, piece, new_row, new_col):
+        """
+        Checks if the piece being captured is an opponent
+        :param piece: A string for the color chess piece
+        :param new_row: An int for the current row
+        :param new_col: An int for the current col
+        :return: True if the player is capturing the opponent piece, otherwise False
+        """
+        second_piece = self._board[new_row][new_col]
+        if (piece.isupper() and second_piece.isupper()) or (piece.islower() and second_piece.islower()):
             return False
         return True
 
@@ -127,11 +137,10 @@ class ChessVar:
         """
         current_row, current_col = self.convert_position(current_pos)
         new_row, new_col = self.convert_position(new_pos)
-        row = current_row
-        col = current_col
         # Checks horizontal/vertical paths for pieces in the way
         if new_row == current_row or new_col == current_col:
             if new_row != current_row:
+                row = current_row
                 if new_row > current_row:
                     index = 1
                 else:
@@ -140,18 +149,18 @@ class ChessVar:
                     if self._board[row][new_col] != ' ':
                         return False
             elif current_col != new_col:
+                col = current_col
                 if new_col > current_col:
                     index = 1
                 else:
                     index = -1
                 for col in range(current_col + index, new_col, index):
-                    if self._board[row][col] != ' ':
+                    if self._board[new_row][col] != ' ':
                         return False
         # if all passes checks if the piece to be captured is an opponent or if the space is empty
         if self._board[new_row][new_col] == ' ':  # if destination is empty
             return True
-        elif (piece == 'r' and self._board[new_row][new_col].isupper()
-              or (piece == 'R' and self._board[new_row][new_col].islower())):  # Checks if piece is opponent
+        elif self.is_opponent(piece,new_row,new_col):  # Checks if piece is opponent
             return True
 
     def validate_knight_move(self, piece, current_pos, new_pos):
@@ -162,7 +171,14 @@ class ChessVar:
         :param new_pos: int for the destination knight position
         :return: True if the move is valid, otherwise False
         """
-        pass
+        current_row, current_col = self.convert_position(current_pos)
+        new_row, new_col = self.convert_position(new_pos)
+        if new_row != current_row and new_col != current_col: # Checks if it is an L path
+            if ((abs(new_row - current_row) == 2 and abs(new_col - current_col) == 1)
+                or (abs(new_row - current_row) == 1 and abs(new_col - current_col) == 2)):
+                    if self.is_opponent(piece,new_row,new_col) or self._board[new_row][new_col] == ' ':
+                        return True
+        return False
 
     def validate_bishop_moves(self, piece, current_pos, new_pos):
         """
@@ -174,21 +190,53 @@ class ChessVar:
         """
         current_row, current_col = self.convert_position(current_pos)
         new_row, new_col = self.convert_position(new_pos)
+        print("At least it ran?")
         if current_row == new_row or current_col == new_col:
+            print("Check again")
             return False # The move is not along a diagonal path
-        pass
+        elif abs(new_row - current_row) == 1 and abs(new_col - current_col) == 1: # This is a diagonal path
+            if self.is_opponent(piece,new_row,new_col):
+                return True
+        elif new_row - new_col % 9 == 0:
+            print("it worked???")
+            return True
 
-    def get_queen_moves(self):
-        pass
-    def get_king_moves(self):
-        pass
+    def validate_queen_move(self, piece, current_pos, new_pos):
+        return True
+
+    def validate_king_move(self, piece, current_pos, new_pos):
+        """
+        Checks if new_position is a valid king move and makes sure any opponent captures are valid.
+        :param piece: string for the color king piece - lowercase for black, uppercase for white
+        :param current_pos: int for the current king position
+        :param new_pos: int for the destination king position
+        :return: True if the move is valid, otherwise False
+        """
+        # current_row, current_col = self.convert_position(current_pos)
+        # new_row, new_col = self.convert_position(new_pos)
+        # if current_row + 1
+        return True
 
     def validate_move(self, piece, current_pos, new_pos):
+        """
+        A helper method to call the correct chess piece function for validating moves
+        :param piece: A string for the piece
+        :param current_pos: An int for the current position
+        :param new_pos: An int for the new position
+        :return: True or false depending on the result of the called function
+        """
         if piece == 'p' or piece == 'P':
             return self.validate_pawn_move(piece, current_pos, new_pos)
-        elif piece =='r' or piece == 'R':
+        elif piece == 'r' or piece == 'R':
             return self.validate_rook_move(piece, current_pos, new_pos)
-        return True
+        elif piece == 'n' or piece == 'N':
+            return self.validate_knight_move(piece, current_pos, new_pos)
+        elif piece == 'b' or piece == 'B':
+            return self.validate_bishop_moves(piece, current_pos, new_pos)
+        elif piece == 'q' or piece == 'Q':
+            return self.validate_queen_move(piece, current_pos, new_pos)
+        elif piece == 'k' or piece == 'K':
+            return self.validate_king_move(piece, current_pos, new_pos)
 
 
     def make_move(self, current_pos, new_pos):
@@ -214,11 +262,3 @@ class ChessVar:
             self._board[current_row][current_col] = ' ' # Replaces the old position as empty
             self._board[new_row][new_col] = piece # Captures any pieces that is there
             return True
-
-# game = ChessVar()
-# print(game.make_move('d2', 'd4'))
-# print(game.make_move('g7', 'g5'))
-# print(game.make_move('c1', 'g5'))
-# print(game.make_move('e7', 'e6'))
-# print(game.make_move('g5', 'd8'))
-# pprint.pp(game.get_board("audience"))

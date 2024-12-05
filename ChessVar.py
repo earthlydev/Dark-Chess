@@ -3,7 +3,8 @@
 # Date: 12/08/2024
 # Description:
 
-# import pprint
+import pprint
+
 class ChessVar:
     """
     A class to represent a game of dark chess. Uses Chess Piece class
@@ -187,7 +188,7 @@ class ChessVar:
             return self.validate_pawn_move(piece, current_pos, new_pos)
         elif piece =='r' or piece == 'R':
             return self.validate_rook_move(piece, current_pos, new_pos)
-        pass
+        return True
 
 
     def make_move(self, current_pos, new_pos):
@@ -214,16 +215,10 @@ class ChessVar:
             self._board[new_row][new_col] = piece # Captures any pieces that is there
             return True
 
-# game = ChessVar()
-# pprint.pp(game.make_move('b2', 'b4'))
-# print(game.validate_pawn_move('p', 'a7', 'a5'))
-# pprint.pp(game.make_move('b7','b5'))
-# pprint.pp(game.make_move('c1', 'b2')) # a valid move for bishop
-#
-# # pprint.pp(game.make_move('g7', 'g5'))
-# # pprint.pp(game.make_move('c1', 'g5'))
-# # pprint.pp(game.make_move('e7', 'e6'))
-# # pprint.pp(game.make_move('g5', 'd8'))
-# pprint.pp(game.get_board("audience"))
-# # pprint.pp(game.get_board("white"))
-# # pprint.pp(game.get_board("black"))
+game = ChessVar()
+print(game.make_move('d2', 'd4'))
+print(game.make_move('g7', 'g5'))
+print(game.make_move('c1', 'g5'))
+print(game.make_move('e7', 'e6'))
+print(game.make_move('g5', 'd8'))
+pprint.pp(game.get_board("audience"))

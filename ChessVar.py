@@ -309,12 +309,12 @@ class ChessVar:
             self.set_current_turn() # Switches turns for current player
             return True
 
-game = ChessVar()
-print(game.make_move('d2', 'd4'))
-print(game.make_move('g7', 'g5'))
-print(game.make_move('c1', 'g5'))
-print(game.make_move('e7', 'e6'))
-print(game.make_move('g5', 'd8'))
-pprint.pp(game.get_board("audience"))
-pprint.pp(game.get_board("white"))
-pprint.pp(game.get_board("black"))
+# game = ChessVar()
+# print(game.make_move('d2', 'd4'))
+# print(game.make_move('g7', 'g5'))
+# print(game.make_move('c1', 'g5'))
+# print(game.make_move('e7', 'e6'))
+# print(game.make_move('g5', 'd8'))
+# pprint.pp(game.get_board("audience"))
+# pprint.pp(game.get_board("white"))
+# pprint.pp(game.get_board("black"))

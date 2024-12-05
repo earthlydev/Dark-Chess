@@ -23,8 +23,8 @@ class ChessVar:
             [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
             [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
             ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
-            ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'] ]
-        self._current_player = 'WHITE'
+            ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
+        ]
 
     def convert_position(self, pos):
         """
@@ -51,7 +51,7 @@ class ChessVar:
         elif any('k' in row for row in self._board) and ('K' not in row for row in self._board):
             return 'BlACK_WON'
 
-    def get_board(self, perspective): #### ADD PERSPECTIVE AT END ####
+    def get_board(self, perspective):
         """
         Displays the board where it's oriented for white perspective, for black,
         and the audience may view without any hidden information.
@@ -183,32 +183,12 @@ class ChessVar:
     def get_king_moves(self):
         pass
 
-    def set_current_player(self):
-        """
-        Sets the player to white or black depending on who made the last move
-        """
-        if self._current_player == 'WHITE':
-            self._current_player = 'BLACK'
-        elif self._current_player == 'BLACK':
-            self._current_player = 'WHITE'
-
-    def is_players_piece(self,piece):
-        """
-        Checks if the piece corresponds with the current players
-        :param piece: A string for the current piece
-        :return: True if the piece corresponds with the current players, otherwise False
-        """
-        if self._current_player == 'WHITE' and piece.islower():
-            return False
-        elif self._current_player == 'BLACK' and piece.isupper():
-            return False
-        return True
-
     def validate_move(self, piece, current_pos, new_pos):
         if piece == 'p' or piece == 'P':
             return self.validate_pawn_move(piece, current_pos, new_pos)
         elif piece =='r' or piece == 'R':
             return self.validate_rook_move(piece, current_pos, new_pos)
+        pass
 
 
     def make_move(self, current_pos, new_pos):
@@ -228,12 +208,23 @@ class ChessVar:
             return False
         elif self._board[current_row][current_col] == ' ': # There is no piece at this position
             return False
-        elif not self.is_players_piece(piece): # The piece does not belong to the player
-            return False
         elif not self.validate_move(piece, current_pos, new_pos):
             return False
         else:
             self._board[current_row][current_col] = ' ' # Replaces the old position as empty
             self._board[new_row][new_col] = piece # Captures any pieces that is there
-            self.set_current_player() # Switches players turn
             return True
+
+# game = ChessVar()
+# pprint.pp(game.make_move('b2', 'b4'))
+# print(game.validate_pawn_move('p', 'a7', 'a5'))
+# pprint.pp(game.make_move('b7','b5'))
+# pprint.pp(game.make_move('c1', 'b2')) # a valid move for bishop
+#
+# # pprint.pp(game.make_move('g7', 'g5'))
+# # pprint.pp(game.make_move('c1', 'g5'))
+# # pprint.pp(game.make_move('e7', 'e6'))
+# # pprint.pp(game.make_move('g5', 'd8'))
+# pprint.pp(game.get_board("audience"))
+# # pprint.pp(game.get_board("white"))
+# # pprint.pp(game.get_board("black"))

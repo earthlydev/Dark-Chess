@@ -1,9 +1,9 @@
 # Author: Jericho Arizala
 # GitHub username: earthlydev
 # Date: 12/08/2024
-# Description:
-
-import pprint
+# Description: This program runs a game of dark chess. Two players can compete, where
+# the pieces movements are tracked, when a piece is captured. Additionally, when a player views
+# the board, hides the opponent pieces except when an opponent piece can be captured.
 
 class ChessVar:
     """
@@ -110,7 +110,7 @@ class ChessVar:
         """
         Returns true if the path indicated is straight and contains no obstacles blocking the path
         :param current_row, current_col: Ints for the current position of piece.
-        :param new_row, new_pos: Ints for the destination position.
+        :param new_row, new_col: Ints for the destination position.
         :return: True if the path contains no obstacles and is a straight path.
         """
         if new_row == current_row or new_col == current_col: # at least one needs to be true
@@ -124,7 +124,8 @@ class ChessVar:
                 for col in range(current_col + index, new_col, index):
                     if self._board[new_row][col] != ' ':
                         return False
-        return True
+            else:
+                return True
 
     def is_diagonal_path(self, current_row, current_col, new_row, new_col):
         """
@@ -187,12 +188,14 @@ class ChessVar:
         """
         current_row, current_col = self.convert_position(current_pos)
         new_row, new_col = self.convert_position(new_pos)
-        if not self.is_straight_path(current_row, current_col, new_row, new_col):
+        if self.is_straight_path(current_row, current_col, new_row, new_col):
+            if self._board[new_row][new_col] == ' ':  # if destination is empty
+                print("checked if the space is empty")
+                return True
+            elif self.is_opponent(piece,new_row,new_col):  # Checks if piece is opponent
+                return True
+        else:
             return False
-        elif self._board[new_row][new_col] == ' ':  # if destination is empty
-            return True
-        elif self.is_opponent(piece,new_row,new_col):  # Checks if piece is opponent
-            return True
 
     def validate_knight_move(self, piece, current_pos, new_pos):
         """
@@ -309,12 +312,6 @@ class ChessVar:
             self.set_current_turn() # Switches turns for current player
             return True
 
-# game = ChessVar()
-# print(game.make_move('d2', 'd4'))
-# print(game.make_move('g7', 'g5'))
-# print(game.make_move('c1', 'g5'))
-# print(game.make_move('e7', 'e6'))
-# print(game.make_move('g5', 'd8'))
-# pprint.pp(game.get_board("audience"))
-# pprint.pp(game.get_board("white"))
-# pprint.pp(game.get_board("black"))
+# TODO: Implement a feature to allow the player to view what piece is allowed to be captured
+# Does this entail utilizing the validate_piece_move()
+# how would I loop through available positions?

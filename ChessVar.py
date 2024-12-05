@@ -106,6 +106,47 @@ class ChessVar:
             return False
         return True
 
+    def is_straight_path(self, current_row, current_col, new_row, new_col):
+        """
+        Returns true if the path indicated is straight and contains no obstacles blocking the path
+        :param current_row, current_col: Ints for the current position of piece.
+        :param new_row, new_pos: Ints for the destination position.
+        :return: True if the path contains no obstacles and is a straight path.
+        """
+        if new_row == current_row or new_col == current_col: # at least one needs to be true
+            if new_row != current_row: # Checking the vertical path
+                index = 1 if new_row > current_row else -1
+                for row in range(current_row + index, new_row, index):
+                    if self._board[row][new_col] != ' ': # if the row reaches an obstacle
+                        return False # return False
+            elif current_col != new_col: # otherwise check the horizontal path
+                index = 1 if new_col > current_col else -1
+                for col in range(current_col + index, new_col, index):
+                    if self._board[new_row][col] != ' ':
+                        return False
+        return True
+
+    def is_diagonal_path(self, current_row, current_col, new_row, new_col):
+        """
+        Checks that the diagonal path is valid and contains no obstacles.
+        :param current_row, current_col: Ints for the current position
+        :param new_row, new_col: Ints for the destination position
+        :return: Return True if the path contains no obstacles and is correctly calculated.
+        """
+        x_path = abs(new_col - current_col)
+        y_path = abs(new_row - current_row)
+        if x_path == y_path:
+            row_step = 1 if new_row > current_row else -1
+            col_step = 1 if new_col > current_col else -1
+            check_row = current_row + row_step
+            check_col = current_col + col_step
+            while check_row != new_row and check_col != new_col:
+                if self._board[check_row][check_col] != ' ':
+                    return False
+                check_row += row_step
+                check_col += col_step
+        return True
+
     def validate_pawn_move(self, piece, current_pos, new_pos):
         """
         Checks if new_position is a valid pawn move and makes sure any opponent captures are valid.
@@ -146,26 +187,9 @@ class ChessVar:
         """
         current_row, current_col = self.convert_position(current_pos)
         new_row, new_col = self.convert_position(new_pos)
-        # Checks horizontal/vertical paths for pieces in the way
-        if new_row == current_row or new_col == current_col:
-            if new_row != current_row:
-                if new_row > current_row:
-                    index = 1
-                else:
-                    index = -1
-                for row in range(current_row + index, new_row, index):
-                    if self._board[row][new_col] != ' ':
-                        return False
-            elif current_col != new_col:
-                if new_col > current_col:
-                    index = 1
-                else:
-                    index = -1
-                for col in range(current_col + index, new_col, index):
-                    if self._board[new_row][col] != ' ':
-                        return False
-        # if all passes checks if the piece to be captured is an opponent or if the space is empty
-        if self._board[new_row][new_col] == ' ':  # if destination is empty
+        if not self.is_straight_path(current_row, current_col, new_row, new_col):
+            return False
+        elif self._board[new_row][new_col] == ' ':  # if destination is empty
             return True
         elif self.is_opponent(piece,new_row,new_col):  # Checks if piece is opponent
             return True
@@ -187,7 +211,7 @@ class ChessVar:
                         return True
         return False
 
-    def validate_bishop_moves(self, piece, current_pos, new_pos):
+    def validate_bishop_move(self, piece, current_pos, new_pos):
         """
         Checks if new_position is a valid bishop move and makes sure any opponent captures are valid.
         :param piece: string for the color bishop piece - lowercase for black, uppercase for white
@@ -197,19 +221,28 @@ class ChessVar:
         """
         current_row, current_col = self.convert_position(current_pos)
         new_row, new_col = self.convert_position(new_pos)
-        print("At least it ran?")
-        if current_row == new_row or current_col == new_col:
-            print("Check again")
-            return False # The move is not along a diagonal path
-        elif abs(new_row - current_row) == 1 and abs(new_col - current_col) == 1: # This is a diagonal path
-            if self.is_opponent(piece,new_row,new_col):
-                return True
-        elif new_row - new_col % 9 == 0:
-            print("it worked???")
+        if not self.is_diagonal_path(current_row, current_col, new_row, new_col):
+            return False
+        elif self.is_opponent(piece,new_row,new_col):
             return True
 
     def validate_queen_move(self, piece, current_pos, new_pos):
-        return True
+        """
+        Checks if the new position is a valid queen move, any opponent captures are valid, and
+        if path along does not contain any obstacles.
+        :param piece: String for the color queen piece
+        :param current_pos: int for the current queen position
+        :param new_pos: int for the destination queen position
+        :return: True if the move is valid, otherwise False
+        """
+        current_row, current_col = self.convert_position(current_pos)
+        new_row, new_col = self.convert_position(new_pos)
+        if not self.is_diagonal_path(current_row, current_col, new_row, new_col):
+            return False
+        elif not self.is_straight_path(current_row, current_col, new_row, new_col):
+            return False
+        elif self.is_opponent(piece,new_row,new_col):
+            return True
 
     def validate_king_move(self, piece, current_pos, new_pos):
         """
@@ -219,10 +252,12 @@ class ChessVar:
         :param new_pos: int for the destination king position
         :return: True if the move is valid, otherwise False
         """
-        # current_row, current_col = self.convert_position(current_pos)
-        # new_row, new_col = self.convert_position(new_pos)
-        # if current_row + 1
-        return True
+        current_row, current_col = self.convert_position(current_pos)
+        new_row, new_col = self.convert_position(new_pos)
+        if abs(new_row - current_row) > 1 or abs(new_col - current_col) > 1:
+            return False # because king can move one space around
+        elif self.is_opponent(piece,new_row,new_col) or self._board[new_row][new_col] == ' ':
+            return True
 
     def validate_move(self, piece, current_pos, new_pos):
         """
@@ -239,7 +274,7 @@ class ChessVar:
         elif piece == 'n' or piece == 'N':
             return self.validate_knight_move(piece, current_pos, new_pos)
         elif piece == 'b' or piece == 'B':
-            return self.validate_bishop_moves(piece, current_pos, new_pos)
+            return self.validate_bishop_move(piece, current_pos, new_pos)
         elif piece == 'q' or piece == 'Q':
             return self.validate_queen_move(piece, current_pos, new_pos)
         elif piece == 'k' or piece == 'K':
@@ -274,12 +309,12 @@ class ChessVar:
             self.set_current_turn() # Switches turns for current player
             return True
 
-# game = ChessVar()
-# print(game.make_move('a2', 'a4'))
-# print(game.make_move('g7', 'g5'))
-# print(game.make_move('c1', 'g5'))
-# print(game.make_move('e7', 'e6'))
-# print(game.make_move('g5', 'd8'))
-# pprint.pp(game.get_board("audience"))
-# print(game.get_board("white"))
-# print(game.get_board("black"))
+game = ChessVar()
+print(game.make_move('d2', 'd4'))
+print(game.make_move('g7', 'g5'))
+print(game.make_move('c1', 'g5'))
+print(game.make_move('e7', 'e6'))
+print(game.make_move('g5', 'd8'))
+pprint.pp(game.get_board("audience"))
+pprint.pp(game.get_board("white"))
+pprint.pp(game.get_board("black"))

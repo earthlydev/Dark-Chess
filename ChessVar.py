@@ -3,8 +3,7 @@
 # Date: 12/08/2024
 # Description:
 
-import pprint
-
+# import pprint
 class ChessVar:
     """
     A class to represent a game of dark chess. Uses Chess Piece class

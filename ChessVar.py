@@ -3,6 +3,8 @@
 # Date: 12/08/2024
 # Description:
 
+import pprint
+
 class ChessVar:
     """
     A class to represent a game of dark chess. Uses Chess Piece class
@@ -23,6 +25,7 @@ class ChessVar:
             ['P', 'P', 'P', 'P', 'P', 'P', 'P', 'P'],
             ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R']
         ]
+        self._current_turn = 'WHITE'
 
     def convert_position(self, pos):
         """
@@ -35,6 +38,12 @@ class ChessVar:
         col = columns.index(pos[0])
         row = rows.index(pos[1])
         return row, col
+
+    def set_current_turn(self):
+        """
+        Switches the current turn depending on the previous turn
+        """
+        self._current_turn = 'WHITE' if self._current_turn == 'BLACK' else 'BLACK'
 
     def get_game_state(self):
         """
@@ -140,7 +149,6 @@ class ChessVar:
         # Checks horizontal/vertical paths for pieces in the way
         if new_row == current_row or new_col == current_col:
             if new_row != current_row:
-                row = current_row
                 if new_row > current_row:
                     index = 1
                 else:
@@ -149,7 +157,6 @@ class ChessVar:
                     if self._board[row][new_col] != ' ':
                         return False
             elif current_col != new_col:
-                col = current_col
                 if new_col > current_col:
                     index = 1
                 else:
@@ -238,7 +245,6 @@ class ChessVar:
         elif piece == 'k' or piece == 'K':
             return self.validate_king_move(piece, current_pos, new_pos)
 
-
     def make_move(self, current_pos, new_pos):
         """
         Moves the indicated piece to the new spot position
@@ -250,15 +256,30 @@ class ChessVar:
         current_row, current_col = self.convert_position(current_pos)
         piece = self._board[current_row][current_col]
         new_row, new_col = self.convert_position(new_pos)
-        if self.get_game_state() != 'UNFINISHED': # The game is finished
-            return False
-        elif not self.is_in_bounds(current_pos) and not self.is_in_bounds(new_pos): # If starting position and destination position is within bounds
-            return False
-        elif self._board[current_row][current_col] == ' ': # There is no piece at this position
-            return False
+        if self.get_game_state() != 'UNFINISHED':
+            return False # The game is finished
+        elif piece.islower() and self._current_turn == 'WHITE':
+            return False # piece attempting to move is black
+        elif piece.isupper() and self._current_turn == 'BLACK':
+            return False # piece attempting to move is white
+        elif not self.is_in_bounds(current_pos) and not self.is_in_bounds(new_pos):
+            return False # If starting position and destination position is within bounds
+        elif self._board[current_row][current_col] == ' ':
+            return False # There is no piece at this position
         elif not self.validate_move(piece, current_pos, new_pos):
             return False
         else:
             self._board[current_row][current_col] = ' ' # Replaces the old position as empty
             self._board[new_row][new_col] = piece # Captures any pieces that is there
+            self.set_current_turn() # Switches turns for current player
             return True
+
+# game = ChessVar()
+# print(game.make_move('d2', 'd4'))
+# print(game.make_move('g7', 'g5'))
+# print(game.make_move('c1', 'g5'))
+# # print(game.make_move('e7', 'e6'))
+# # print(game.make_move('g5', 'd8'))
+# pprint.pp(game.get_board("audience"))
+# # print(game.get_board("white"))
+# # print(game.get_board("black"))

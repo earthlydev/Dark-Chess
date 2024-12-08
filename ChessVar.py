@@ -18,8 +18,8 @@ class ChessVar:
         starting positions. all data members are private.
         """
         self._board = [
-            ['r', 'n', 'q', 'q', 'k', 'b', 'n', 'r'],
-            ['p', 'p', ' ', 'p', 'p', 'p', 'p', 'p'],
+            ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
+            ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
             [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
             [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
             [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],

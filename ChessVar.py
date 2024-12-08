@@ -5,6 +5,8 @@
 # the pieces movements are tracked, when a piece is captured. Additionally, when a player views
 # the board, hides the opponent pieces except when an opponent piece can be captured.
 
+import pprint
+
 class ChessVar:
     """
     A class to represent a game of dark chess. Uses Chess Piece class
@@ -44,6 +46,16 @@ class ChessVar:
         Switches the current turn depending on the previous turn
         """
         self._current_turn = 'WHITE' if self._current_turn == 'BLACK' else 'BLACK'
+
+    def get_current_turn(self):
+        """
+        Returns the value of whose turn it is
+        :return: 'WHITE','BLACK', or game is not over.
+        """
+        game_state = self.get_game_state()
+        if game_state != 'UNFINISHED':
+            return 'GAME IS OVER'
+        else: return self._current_turn
 
     def get_game_state(self):
         """
@@ -124,8 +136,10 @@ class ChessVar:
                 for col in range(current_col + index, new_col, index):
                     if self._board[new_row][col] != ' ':
                         return False
-            else:
+            else: # otherwise the path is clear and validated
                 return True
+        else: # if both are false then the path is not straight
+            return False
 
     def is_diagonal_path(self, current_row, current_col, new_row, new_col):
         """
@@ -141,12 +155,16 @@ class ChessVar:
             col_step = 1 if new_col > current_col else -1
             check_row = current_row + row_step
             check_col = current_col + col_step
-            while check_row != new_row and check_col != new_col:
+            while check_row != new_row or check_col != new_col:
                 if self._board[check_row][check_col] != ' ':
                     return False
+                if abs(check_row - new_row) == 1 and abs(check_col - new_col) == 1:
+                    return True
                 check_row += row_step
                 check_col += col_step
-        return True
+            return True
+        else:
+            return False
 
     def validate_pawn_move(self, piece, current_pos, new_pos):
         """
@@ -159,15 +177,12 @@ class ChessVar:
         current_row, current_col = self.convert_position(current_pos)
         new_row, new_col = self.convert_position(new_pos)
         if piece == 'p': # Black pawn logic
-            if new_col == current_col: # a7 = [1][0] = [3][0]
-                if ((new_row == current_row + 1 or new_row == current_row + 2)
-                        and self._board[new_row][new_col] == ' '):
-                    return True # If the pawn moves within 2 rows down and same column true
-            if (new_row == current_row + 1
-                    and (new_col == current_col + 1 or new_col == current_col - 1)
-                    and self._board[current_row][current_col] != ' '):
-                if self._board[new_row][new_col].isupper():
-                    return True
+            if new_col == current_col:
+                if current_row == 1: # First move
+                    if new_row == current_row + 1 or new_row == current_row + 2:
+                        return True # If the pawn moves within 2 rows down and same column true
+                elif new_row == current_row + 1:
+                    return True # Otherwise new move should be only 1
         elif piece == 'P': # White pawn logic
             if new_row >= current_row - 2 and self._board[new_row][new_col] == ' ':
                     return True
@@ -188,14 +203,12 @@ class ChessVar:
         """
         current_row, current_col = self.convert_position(current_pos)
         new_row, new_col = self.convert_position(new_pos)
-        if self.is_straight_path(current_row, current_col, new_row, new_col):
-            if self._board[new_row][new_col] == ' ':  # if destination is empty
-                print("checked if the space is empty")
-                return True
-            elif self.is_opponent(piece,new_row,new_col):  # Checks if piece is opponent
-                return True
-        else:
+        if not self.is_straight_path(current_row, current_col, new_row, new_col):
             return False
+        elif self._board[new_row][new_col] == ' ':  # if destination is empty
+            return True
+        elif self.is_opponent(piece,new_row,new_col):  # Checks if piece is opponent
+            return True
 
     def validate_knight_move(self, piece, current_pos, new_pos):
         """
@@ -224,10 +237,11 @@ class ChessVar:
         """
         current_row, current_col = self.convert_position(current_pos)
         new_row, new_col = self.convert_position(new_pos)
-        if not self.is_diagonal_path(current_row, current_col, new_row, new_col):
+        if self.is_diagonal_path(current_row, current_col, new_row, new_col):
+            if self.is_opponent(piece,new_row,new_col):
+                return True
+        else:
             return False
-        elif self.is_opponent(piece,new_row,new_col):
-            return True
 
     def validate_queen_move(self, piece, current_pos, new_pos):
         """
@@ -240,12 +254,11 @@ class ChessVar:
         """
         current_row, current_col = self.convert_position(current_pos)
         new_row, new_col = self.convert_position(new_pos)
-        if not self.is_diagonal_path(current_row, current_col, new_row, new_col):
-            return False
-        elif not self.is_straight_path(current_row, current_col, new_row, new_col):
-            return False
-        elif self.is_opponent(piece,new_row,new_col):
-            return True
+        if (self.is_diagonal_path(current_row, current_col, new_row, new_col)
+                or self.is_straight_path(current_row,current_col,new_row,new_col)):
+            if self.is_opponent(piece,new_row,new_col):
+                return True
+            else: return False
 
     def validate_king_move(self, piece, current_pos, new_pos):
         """

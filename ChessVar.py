@@ -18,8 +18,8 @@ class ChessVar:
         starting positions. all data members are private.
         """
         self._board = [
-            ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
-            ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
+            ['r', 'n', 'q', 'q', 'k', 'b', 'n', 'r'],
+            ['p', 'p', ' ', 'p', 'p', 'p', 'p', 'p'],
             [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
             [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
             [' ', ' ', ' ', ' ', ' ', ' ', ' ', ' '],
@@ -142,15 +142,13 @@ class ChessVar:
                 for row in range(current_row + index, new_row, index):
                     if self._board[row][new_col] != ' ': # if the row reaches an obstacle
                         return False # return False
-                    elif abs(row - new_row) == 1:
-                        return True
+                return True
             elif current_col != new_col: # otherwise check the horizontal path
                 index = 1 if new_col > current_col else -1
                 for col in range(current_col + index, new_col, index):
                     if self._board[new_row][col] != ' ':
                         return False
-                    elif abs(col - new_col) == 1:
-                        return True
+                return True
         else: # if both are false then the path is not straight
             return False
 
@@ -221,9 +219,7 @@ class ChessVar:
         new_row, new_col = self.convert_position(new_pos)
         if not self.is_straight_path(current_row, current_col, new_row, new_col):
             return False
-        elif self._board[new_row][new_col] == ' ':  # if destination is empty
-            return True
-        elif self.is_opponent(piece,new_row,new_col):  # Checks if piece is opponent
+        elif self.is_empty(new_row,new_col) or self.is_opponent(piece,new_row,new_col):  # if destination is empty
             return True
 
     def validate_knight_move(self, piece, current_pos, new_pos):
@@ -270,7 +266,7 @@ class ChessVar:
         current_row, current_col = self.convert_position(current_pos)
         new_row, new_col = self.convert_position(new_pos)
         if ((self.is_diagonal_path(current_row, current_col, new_row, new_col)
-                or self.is_straight_path(current_row,current_col,new_row,new_col))
+            or self.is_straight_path(current_row,current_col,new_row,new_col))
             and (self.is_opponent(piece,new_row,new_col) or self.is_empty(new_row,new_col))):
             return True
         return False
@@ -287,7 +283,7 @@ class ChessVar:
         new_row, new_col = self.convert_position(new_pos)
         if abs(new_row - current_row) > 1 or abs(new_col - current_col) > 1:
             return False # because king can move one space around
-        elif self.is_opponent(piece,new_row,new_col) or self._board[new_row][new_col] == ' ':
+        elif self.is_opponent(piece,new_row,new_col) or self.is_empty(new_row,new_col):
             return True
 
     def validate_move(self, piece, current_pos, new_pos):

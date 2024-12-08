@@ -125,19 +125,21 @@ class ChessVar:
         :param new_row, new_col: Ints for the destination position.
         :return: True if the path contains no obstacles and is a straight path.
         """
-        if new_row == current_row or new_col == current_col: # at least one needs to be true
+        if new_row == current_row or new_col == current_col:# at least one needs to be true
             if new_row != current_row: # Checking the vertical path
                 index = 1 if new_row > current_row else -1
                 for row in range(current_row + index, new_row, index):
                     if self._board[row][new_col] != ' ': # if the row reaches an obstacle
                         return False # return False
+                    elif abs(row - new_row) == 1:
+                        return True
             elif current_col != new_col: # otherwise check the horizontal path
                 index = 1 if new_col > current_col else -1
                 for col in range(current_col + index, new_col, index):
                     if self._board[new_row][col] != ' ':
                         return False
-            else: # otherwise the path is clear and validated
-                return True
+                    elif abs(col - new_col) == 1:
+                        return True
         else: # if both are false then the path is not straight
             return False
 
@@ -177,19 +179,18 @@ class ChessVar:
         current_row, current_col = self.convert_position(current_pos)
         new_row, new_col = self.convert_position(new_pos)
         if piece == 'p': # Black pawn logic
-            if new_col == current_col:
-                if current_row == 1: # First move
-                    if new_row == current_row + 1 or new_row == current_row + 2:
-                        return True # If the pawn moves within 2 rows down and same column true
-                elif new_row == current_row + 1:
-                    return True # Otherwise new move should be only 1
+                if new_row >= current_row + 2 and self._board[new_row][new_col] == ' ':
+                    return True
+                if (new_row == current_row + 1
+                        and abs(new_col - current_col == 1)
+                        and self.is_opponent(piece, new_row, new_col)):
+                        return True
         elif piece == 'P': # White pawn logic
             if new_row >= current_row - 2 and self._board[new_row][new_col] == ' ':
                     return True
             if (new_row == current_row - 1
-                    and (new_col == current_col + 1 or new_col == current_col - 1)
-                    and self._board[current_row][current_col] != ' '):
-                if self._board[new_row][new_col].islower():
+                    and abs(new_col - current_col == 1)
+                    and self.is_opponent(piece, new_row, new_col)):
                     return True
         return False
 
@@ -328,3 +329,4 @@ class ChessVar:
 # TODO: Implement a feature to allow the player to view what piece is allowed to be captured
 # Does this entail utilizing the validate_piece_move()
 # how would I loop through available positions?
+

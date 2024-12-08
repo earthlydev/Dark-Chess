@@ -179,12 +179,12 @@ class ChessVar:
         current_row, current_col = self.convert_position(current_pos)
         new_row, new_col = self.convert_position(new_pos)
         if piece == 'p': # Black pawn logic
-                if new_row >= current_row + 2 and self._board[new_row][new_col] == ' ':
+            if new_row <= current_row + 2 and self._board[new_row][new_col] == ' ':
+                return True
+            elif (new_row == current_row + 1
+                    and abs(new_col - current_col == 1)
+                    and self.is_opponent(piece, new_row, new_col)):
                     return True
-                if (new_row == current_row + 1
-                        and abs(new_col - current_col == 1)
-                        and self.is_opponent(piece, new_row, new_col)):
-                        return True
         elif piece == 'P': # White pawn logic
             if new_row >= current_row - 2 and self._board[new_row][new_col] == ' ':
                     return True

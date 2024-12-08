@@ -105,6 +105,17 @@ class ChessVar:
             return False
         return True
 
+    def is_empty(self,new_row,new_col):
+        """
+        Checks to see if the new position is occupied or not
+        :param new_row: An int indicating the row of the board
+        :param new_col: An int indicating the col of the board
+        :return: True if the space is unoccupied, otherwise false if it is.
+        """
+        if self._board[new_row][new_col] != ' ':
+            return False
+        return True
+
     def is_opponent(self, piece, new_row, new_col):
         """
         Checks if the piece being captured is an opponent
@@ -125,7 +136,7 @@ class ChessVar:
         :param new_row, new_col: Ints for the destination position.
         :return: True if the path contains no obstacles and is a straight path.
         """
-        if new_row == current_row or new_col == current_col:# at least one needs to be true
+        if new_row == current_row or new_col == current_col: # at least one needs to be true
             if new_row != current_row: # Checking the vertical path
                 index = 1 if new_row > current_row else -1
                 for row in range(current_row + index, new_row, index):
@@ -179,24 +190,22 @@ class ChessVar:
         current_row, current_col = self.convert_position(current_pos)
         new_row, new_col = self.convert_position(new_pos)
         if piece == 'p': # Black pawn logic
-            if (new_col == current_col
-                    and new_row <= current_row + 2
-                    and self._board[new_row][new_col] == ' '):
+            if (new_col == current_col # moving down
+                and (new_row == current_row + 1 or new_row == current_row + 2) # if the pawn moves 2 or less
+                and self.is_empty(new_row,new_col)): # and the new spot is not oocupied
                 return True
-            elif (new_row == current_row + 1
-                    and abs(new_col - current_col == 1)
-                    and self.is_opponent(piece, new_row, new_col)
-                    and self._board[new_row][new_col] != ' '):
+            elif ((new_row == current_row + 1 and abs(new_col - current_col) == 1)
+                and self.is_opponent(piece, new_row,new_col)
+                and not self.is_empty(new_row,new_col)):
                 return True
-        elif piece == 'P': # White pawn logic
-            if (new_col == current_col
-                    and new_row >= current_row - 2
-                    and self._board[new_row][new_col] == ' '):
+        elif piece == 'P':  # White pawn logic
+            if (new_col == current_col # moving up
+                and (new_row == current_row - 1 or new_row == current_row - 2)
+                and self.is_empty(new_row,new_col)):
                 return True
-            if (new_row == current_row - 1
-                    and abs(new_col - current_col == 1)
-                    and self.is_opponent(piece, new_row, new_col)
-                    and self._board[new_row][new_col] != ' '):
+            elif (new_row == current_row - 1 #capturing pieces
+                and self.is_opponent(piece, new_row, new_col)
+                and not self.is_empty(new_row, new_col)):
                 return True
         return False
 
@@ -244,11 +253,10 @@ class ChessVar:
         """
         current_row, current_col = self.convert_position(current_pos)
         new_row, new_col = self.convert_position(new_pos)
-        if self.is_diagonal_path(current_row, current_col, new_row, new_col):
-            if self.is_opponent(piece,new_row,new_col):
-                return True
-        else:
+        if not self.is_diagonal_path(current_row, current_col, new_row, new_col):
             return False
+        elif self.is_opponent(piece,new_row,new_col) or self.is_empty(new_row,new_col):
+            return True
 
     def validate_queen_move(self, piece, current_pos, new_pos):
         """
@@ -261,11 +269,11 @@ class ChessVar:
         """
         current_row, current_col = self.convert_position(current_pos)
         new_row, new_col = self.convert_position(new_pos)
-        if (self.is_diagonal_path(current_row, current_col, new_row, new_col)
-                or self.is_straight_path(current_row,current_col,new_row,new_col)):
-            if self.is_opponent(piece,new_row,new_col):
-                return True
-            else: return False
+        if ((self.is_diagonal_path(current_row, current_col, new_row, new_col)
+                or self.is_straight_path(current_row,current_col,new_row,new_col))
+            and (self.is_opponent(piece,new_row,new_col) or self.is_empty(new_row,new_col))):
+            return True
+        return False
 
     def validate_king_move(self, piece, current_pos, new_pos):
         """
@@ -334,6 +342,4 @@ class ChessVar:
 
 # TODO: Implement a feature to allow the player to view what piece is allowed to be captured
 # Does this entail utilizing the validate_piece_move()
-# how would I loop through available positions?
-# game = ChessVar()
-# print(game.validate_move('p', 'a6', 'b5'))
+# how would I loop through available positions

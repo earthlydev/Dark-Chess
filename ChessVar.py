@@ -179,19 +179,25 @@ class ChessVar:
         current_row, current_col = self.convert_position(current_pos)
         new_row, new_col = self.convert_position(new_pos)
         if piece == 'p': # Black pawn logic
-            if new_row <= current_row + 2 and self._board[new_row][new_col] == ' ':
+            if (new_col == current_col
+                    and new_row <= current_row + 2
+                    and self._board[new_row][new_col] == ' '):
                 return True
             elif (new_row == current_row + 1
                     and abs(new_col - current_col == 1)
-                    and self.is_opponent(piece, new_row, new_col)):
-                    return True
+                    and self.is_opponent(piece, new_row, new_col)
+                    and self._board[new_row][new_col] != ' '):
+                return True
         elif piece == 'P': # White pawn logic
-            if new_row >= current_row - 2 and self._board[new_row][new_col] == ' ':
-                    return True
+            if (new_col == current_col
+                    and new_row >= current_row - 2
+                    and self._board[new_row][new_col] == ' '):
+                return True
             if (new_row == current_row - 1
                     and abs(new_col - current_col == 1)
-                    and self.is_opponent(piece, new_row, new_col)):
-                    return True
+                    and self.is_opponent(piece, new_row, new_col)
+                    and self._board[new_row][new_col] != ' '):
+                return True
         return False
 
     def validate_rook_move(self, piece, current_pos, new_pos):
@@ -329,4 +335,5 @@ class ChessVar:
 # TODO: Implement a feature to allow the player to view what piece is allowed to be captured
 # Does this entail utilizing the validate_piece_move()
 # how would I loop through available positions?
-
+# game = ChessVar()
+# print(game.validate_move('p', 'a6', 'b5'))

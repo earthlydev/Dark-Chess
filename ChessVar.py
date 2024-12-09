@@ -119,13 +119,15 @@ class ChessVar:
             return False
         return True
 
-    def is_straight_path(self, current_row, current_col, new_row, new_col):
+    def is_straight_path(self, piece, current_row, current_col, new_row, new_col):
         """
         Returns true if the path indicated is straight and contains no obstacles blocking the path
         :param current_row, current_col: Ints for the current position of piece.
         :param new_row, new_col: Ints for the destination position.
         :return: True if the path contains no obstacles and is a straight path.
         """
+        if self._board[current_row][current_col] != piece:
+            return False
         if new_row == current_row or new_col == current_col: # at least one needs to be true
             if new_row != current_row: # Checking the vertical path
                 index = 1 if new_row > current_row else -1
@@ -177,7 +179,6 @@ class ChessVar:
         """
         current_row, current_col = self.convert_position(current_pos)
         new_row, new_col = self.convert_position(new_pos)
-        print(f"the positions for the rook: {current_pos}, {new_pos}")
         if piece == 'p': # Black pawn logic
             if (new_col == current_col # moving down
                 and (new_row == current_row + 1 or new_row == current_row + 2) # if the pawn moves 2 or less
@@ -208,10 +209,9 @@ class ChessVar:
         """
         current_row, current_col = self.convert_position(current_pos)
         new_row, new_col = self.convert_position(new_pos)
-        print(f"the positions for the rook: {current_pos}, {new_pos}")
-        if (self.is_straight_path(current_row, current_col, new_row, new_col)
-            and (self.is_empty(new_row,new_col) or self.is_opponent(piece,new_row,new_col))):  # if destination is empty
-            return True
+        if self.is_straight_path(piece, current_row, current_col, new_row, new_col):
+            if self.is_empty(new_row,new_col) or self.is_opponent(piece,new_row,new_col): # if destination is empty
+                return True
         return False
 
     def validate_knight_move(self, piece, current_pos, new_pos):
@@ -258,7 +258,7 @@ class ChessVar:
         current_row, current_col = self.convert_position(current_pos)
         new_row, new_col = self.convert_position(new_pos)
         if ((self.is_diagonal_path(current_row, current_col, new_row, new_col)
-            or self.is_straight_path(current_row,current_col,new_row,new_col))
+            or self.is_straight_path(piece, current_row,current_col,new_row,new_col))
             and (self.is_opponent(piece,new_row,new_col) or self.is_empty(new_row,new_col))):
             return True
         return False

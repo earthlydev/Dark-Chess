@@ -37,9 +37,12 @@ class ChessVar:
         """
         columns = ['a','b','c','d','e','f','g','h']
         rows = ['8','7','6','5','4','3','2','1']
-        col = columns.index(pos[0])
-        row = rows.index(pos[1])
-        return row, col
+        if pos[0] not in columns or pos[1] not in rows:
+            return False # This checks if the positions are within the bounds
+        else:
+            col = columns.index(pos[0])
+            row = rows.index(pos[1])
+            return row, col
 
     def set_current_turn(self):
         """
@@ -94,17 +97,6 @@ class ChessVar:
                         oriented_board[i][j] = '*'
         return oriented_board
 
-    def is_in_bounds(self, new_pos):
-        """
-        Checks if the new position in within the bounds of the board
-        :param new_pos: A string where the piece wants to move.
-        :return: True if the position is within bounds, otherwise False
-        """
-        new_row, new_col = self.convert_position(new_pos)
-        if new_row > 7 or new_col > 7: # new position is out of boundaries
-            return False
-        return True
-
     def is_empty(self,new_row,new_col):
         """
         Checks to see if the new position is occupied or not
@@ -149,7 +141,7 @@ class ChessVar:
                     if self._board[new_row][col] != ' ':
                         return False
                 return True
-        else: # if both are false then the path is not straight
+        else:
             return False
 
     def is_diagonal_path(self, current_row, current_col, new_row, new_col):
@@ -217,10 +209,10 @@ class ChessVar:
         """
         current_row, current_col = self.convert_position(current_pos)
         new_row, new_col = self.convert_position(new_pos)
-        if not self.is_straight_path(current_row, current_col, new_row, new_col):
-            return False
-        elif self.is_empty(new_row,new_col) or self.is_opponent(piece,new_row,new_col):  # if destination is empty
+        if (self.is_straight_path(current_row, current_col, new_row, new_col)
+            and (self.is_empty(new_row,new_col) or self.is_opponent(piece,new_row,new_col))):  # if destination is empty
             return True
+        return False
 
     def validate_knight_move(self, piece, current_pos, new_pos):
         """
@@ -315,17 +307,18 @@ class ChessVar:
         :return: True for a valid move, when true moves piece and captures any pieces.
             False otherwise
         """
-        current_row, current_col = self.convert_position(current_pos)
+        if self.convert_position(current_pos) is False or self.convert_position(new_pos) is False:
+            return False
+        else:
+            current_row, current_col = self.convert_position(current_pos)
+            new_row, new_col = self.convert_position(new_pos)
         piece = self._board[current_row][current_col]
-        new_row, new_col = self.convert_position(new_pos)
         if self.get_game_state() != 'UNFINISHED':
             return False # The game is finished
         elif piece.islower() and self._current_turn == 'WHITE':
             return False # piece attempting to move is black
         elif piece.isupper() and self._current_turn == 'BLACK':
             return False # piece attempting to move is white
-        elif not self.is_in_bounds(current_pos) and not self.is_in_bounds(new_pos):
-            return False # If starting position and destination position is within bounds
         elif self._board[current_row][current_col] == ' ':
             return False # There is no piece at this position
         elif not self.validate_move(piece, current_pos, new_pos):
@@ -336,6 +329,3 @@ class ChessVar:
             self.set_current_turn() # Switches turns for current player
             return True
 
-# TODO: Implement a feature to allow the player to view what piece is allowed to be captured
-# Does this entail utilizing the validate_piece_move()
-# how would I loop through available positions

@@ -209,6 +209,7 @@ class ChessVar:
         """
         current_row, current_col = self.convert_position(current_pos)
         new_row, new_col = self.convert_position(new_pos)
+        print(f"{current_pos}, {new_pos}")
         if (self.is_straight_path(current_row, current_col, new_row, new_col)
             and (self.is_empty(new_row,new_col) or self.is_opponent(piece,new_row,new_col))):  # if destination is empty
             return True
@@ -328,4 +329,3 @@ class ChessVar:
             self._board[new_row][new_col] = piece # Captures any pieces that is there
             self.set_current_turn() # Switches turns for current player
             return True
-

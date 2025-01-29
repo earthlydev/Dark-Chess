@@ -5,6 +5,8 @@
 # the pieces movements are tracked, when a piece is captured. Additionally, when a player views
 # the board, hides the opponent pieces except when an opponent piece can be captured.
 
+import pprint
+
 class ChessVar:
     """
     A class to represent a game of dark chess. Uses Chess Piece class
@@ -126,14 +128,22 @@ class ChessVar:
         :param new_row, new_col: Ints for the destination position.
         :return: True if the path contains no obstacles and is a straight path.
         """
+        print("This ran")
         if self._board[current_row][current_col] != piece:
+            print(piece)
+            print(self._board[current_row][current_col])
+            print("just returned false")
             return False
         if new_row == current_row or new_col == current_col: # at least one needs to be true
+            print("passed")
             if new_row != current_row: # Checking the vertical path
+                print("im working")
                 index = 1 if new_row > current_row else -1
                 for row in range(current_row + index, new_row, index):
                     if self._board[row][new_col] != ' ': # if the row reaches an obstacle
+                        print("this is where I leave")
                         return False # return False
+                print ("the for loop ran successfully")
                 return True
             elif current_col != new_col: # otherwise check the horizontal path
                 index = 1 if new_col > current_col else -1
@@ -328,3 +338,14 @@ class ChessVar:
             self._board[new_row][new_col] = piece # Captures any pieces that is there
             self.set_current_turn() # Switches turns for current player
             return True
+
+game = ChessVar()
+print(game.make_move('d2', 'd4'))
+print(game.make_move('g7', 'g5'))
+print(game.make_move('c1', 'g5'))
+print(game.make_move('e7', 'e6'))
+print(game.make_move('g5', 'd8'))
+print(game.make_move('a7', 'a5'))
+print(game.make_move('b2', 'b4'))
+print(game.make_move('a8','a6'))
+pprint.pp(game.get_board("audience"))
